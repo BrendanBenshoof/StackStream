@@ -34,7 +34,7 @@ This effectively doubles the number of bytes required to store a length. I'd lov
 ## The Stack
 
 The basis of stack assembly languages is "the stack", which in this language is really just a binary "file-like" buffer.
-Because the encoding stores their length, they can be blindly perpended to the buffer and read off safely.
+Because the encoding stores their length, they can be blindly prepended to the buffer and read off safely.
 Most opcodes read their arguments off the stack, which makes it a combination of working memory and inter-method communication
 
 When a method is called, arguments may be passed to it via the stack, and values returned via the stack.
