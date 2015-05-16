@@ -62,12 +62,12 @@ Note that opcodes are stored as bytestrings, which means we have room for infini
 | OUTPUT        | 1             | bytestring                |               |              | Reads a bytestring off the stack and outputs it   |
 | BURN          | 2             | bytestring                |               |              | Consumes and discards a value                     |
 | START-CONTEXT | 3             |                           |               |              | Puts a new memory context on the memory stack     |
-| END-CONTEXT   | 3             |                           |               |              | discards the top context of the memory stack      |
-| STORE         | 4             | key, value                |               |              | stores value at key in top context                |
-| READ          | 5             | key                       |               | value        | gets value stored at key in memory stack          |
-| CMP           | 6             | val0, val1                | mode          | result       | preforms a comparison of the top two items        |
-| JMP           | 7             | dest-byte, testval        |               |              | moves the program pointer to dest-byte if testval |
-| CALL          | 8             | module-id                 |               | call results | looks up code at module-id and executes it        |
+| END-CONTEXT   | 4             |                           |               |              | discards the top context of the memory stack      |
+| STORE         | 5             | key, value                |               |              | stores value at key in top context                |
+| READ          | 6             | key                       |               | value        | gets value stored at key in memory stack          |
+| CMP           | 7             | val0, val1                | mode          | result       | preforms a comparison of the top two items        |
+| JMP           | 8             | dest-byte, testval        |               |              | moves the program pointer to dest-byte if testval |
+| CALL          | 9             | module-id                 |               | call results | looks up code at module-id and executes it        |
 
 JMP and CALL are the most complex commands. JMP is complex because it may be difficult to assign values to the dest-bytes 
 (variable length references change the length of the source).
