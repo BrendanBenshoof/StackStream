@@ -83,3 +83,24 @@ StackStream will start at the first byte, interpreting it as a bytestring opcode
 Because of it's streaming nature, execution of code can begin while it is still being read and code can be stored in burned literals.
 This means de-compiling ByteStream code requires interpreting it (as the destination of JMP commands can be altered at runtime)
 Adding commands to allow read-write to a DHT or Module Store would allow ByteStream to effectively self modify.
+
+## Using StackStream to describe a DAG based data store
+
+The original incentive to StackStream was to provide a simple method for encoding data structures in IPFS blobs.
+The follwing source shows how a current DAG block with reference to other blocks could be encoded.
+
+```
+PUT BLOCKID0 #reference other blocks first
+CALL #go fetch them and output thier contents
+PUT BLOCKID1
+CALL
+PUT BLOCKID2
+CALL
+PUT BLOCKID3
+CALL
+PUT RAWDATA
+OUTPUT
+```
+
+
+
