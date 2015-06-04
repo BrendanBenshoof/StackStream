@@ -29,7 +29,7 @@
     | 12 SUB   | subtracts top two stack item: 2nd - TOP
     | 13 MUL   | multiplies top two stack items
     | 14 DIV   | divides top two stack item: 2nd / TOP
-    
+    | 15 MOD   | divides top two stack item: 2nd % TOP
 
 """
 
@@ -37,9 +37,13 @@ import binascii
 import io
 
 def bytes2int(bytes):
-    if type(bytes) is int:
+    if type(bytes) is int or type(bytes) is long:
         return bytes
-    return int(binascii.hexlify(bytes), 16) 
+    hexval = binascii.hexlify(bytes)
+
+
+
+    return int(hexval,16) 
 
 
 
@@ -66,7 +70,7 @@ def readline(sourceStream):
     """
         ops that take arguments: PUT, CMP, JMP
     """
-    if op in b'\x00\x07\x08':
+    if op in b'\x00\x07\x08\x0A':
         arg = readval(sourceStream)
 
     return op, arg
@@ -137,10 +141,19 @@ JMP 22 \x08\x01\x18
 def run(sourceStream):
     memory = [{}]
     stack = []
-    op, arg = readline(sourceStream)
+    fileStack = [sourceStream]
+    op, arg = readline(fileStack[-1])
     opcount = 1000
-    while(op and opcount > 0):
-       
+    while(op or len(fileStack)>0):
+        if opcount <= 0:
+            break
+        if not op:
+            fp = fileStack.pop()
+            fp.close()
+            if len(fileStack) < 0:
+                break
+            op, arg = readline(fileStack[-1])
+            continue
         opcount-=1
         #print(op,arg)
         if op == b'\x00': #PUT
@@ -176,32 +189,43 @@ def run(sourceStream):
             test = stack.pop()
             if test != b'\x00':
                 index = bytes2int(arg)
-                sourceStream.seek(index)
+                fileStack[-1].seek(index)
 
-        elif op == b'\x09': #CURRENTLY NOT IMPLIMENTED
-            pass
+        elif op == b'\x09': #CALL
+            fname = stack.pop()
+            fp = open(fname,'r')
+            fileStack.append(fp)
 
-        elif op == b'\x0A': #ADD
+
+        elif op == b'\x0A': #DUMP
+            print("DUMPING",arg)
+            yield arg
+
+        elif op == b'\x0B': #ADD
             arg1 = bytes2int(stack.pop())
             arg2 = bytes2int(stack.pop())
             stack.append(arg2+arg1)
-        elif op == b'\x0B': #SUB
+        elif op == b'\x0C': #SUB
             arg1 = bytes2int(stack.pop())
             arg2 = bytes2int(stack.pop())
             stack.append(arg2-arg1)
-        elif op == b'\x0C': #MUL
+        elif op == b'\x0D': #MUL
             arg1 = bytes2int(stack.pop())
             arg2 = bytes2int(stack.pop())
             stack.append(arg2*arg1)
-        elif op == b'\x0D': #DIV
+        elif op == b'\x0E': #DIV
             arg1 = bytes2int(stack.pop())
             arg2 = bytes2int(stack.pop())
             stack.append(arg2/arg1)
-
+        elif op == b'\x0F': #MOD
+            arg1 = bytes2int(stack.pop())
+            arg2 = bytes2int(stack.pop())
+            stack.append(arg2%arg1)
         else:
+            print(op,arg,memory[0],stack)
             raise Exception()
-        #print(op,arg,memory[0],stack)
-        op, arg = readline(sourceStream)
+            
+        op, arg = readline(fileStack[-1])
 
-for l in run(f):
+for l in run(io.BytesIO(b'\x00\x08hello.ss\t\x00\x01\x00\x00\x01a\x05\x00\x01\x01\x00\x01b\x05\x00\x01a\x06\x00\x01b\x06\x0b\x00\x01c\x05\x00\x01b\x06\x00\x01a\x05\x00\x01c\x06\x00\x01b\x05\x00\x01c\x06\x01\x00\x04True\x08\x01\x19')):
     print(l)
